@@ -1,4 +1,4 @@
-package awsconfig
+package awsConfig
 
 import (
 	"context"

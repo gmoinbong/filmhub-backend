@@ -1,7 +1,13 @@
 package main
 
-import "movie-service/aws/awsoperations"
+import (
+	"movie-service/router"
+	"movie-service/router/env"
+)
 
 func main() {
-	awsoperations.ListObjectsInBucket("myownbucket14")
+	env.LoadEnv()
+	port := env.GoPort()
+
+	router.StartServer(port)
 }
