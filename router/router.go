@@ -2,14 +2,14 @@ package router
 
 import (
 	"log"
-	"movie-service/aws/awsOperations"
+	"movie-service/aws/awsHandlers"
 	"net/http"
 )
 
 func SetupRoutes() {
-	http.HandleFunc("/upload-aws", awsOperations.UploadFileHandler)
+	http.HandleFunc("/list-aws", awsHandlers.ListObjectsHandler)
 
-	http.HandleFunc("list-aws", awsOperations.ListObjectsHandler)
+	http.HandleFunc("/upload-aws", awsHandlers.UploadFileHandler)
 }
 
 func StartServer(port string) {

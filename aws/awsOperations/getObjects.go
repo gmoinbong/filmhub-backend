@@ -2,12 +2,9 @@ package awsOperations
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"movie-service/aws/awsConfig"
-	"net/http"
-	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -44,16 +41,4 @@ func ListObjectsInBucket(bucketName string) ([]S3Object, error) {
 
 	return objects, nil
 
-}
-
-func ListObjectsHandler(w http.ResponseWriter, r *http.Request) {
-	bucketName := os.Getenv("BUCKET_NAME")
-	objects, err := ListObjectsInBucket(bucketName)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("unable to list objects in bucket: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(objects)
 }
