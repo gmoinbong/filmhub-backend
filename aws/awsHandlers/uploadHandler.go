@@ -14,6 +14,7 @@ func UploadFileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
+
 	fileUrl, err := awsOperations.UploadFileToBucket("myownbucket14", fileHandler)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("unable to upload file to S3: %v", err), http.StatusInternalServerError)

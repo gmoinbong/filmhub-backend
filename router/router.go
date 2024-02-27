@@ -8,9 +8,8 @@ import (
 
 func SetupRoutes() {
 	http.HandleFunc("/aws/list", awsHandlers.ListObjectsHandler)
-
 	http.HandleFunc("/aws/upload", awsHandlers.UploadFileHandler)
-
+	http.HandleFunc("aws/update", awsHandlers.UpdateObjectHandler)
 	http.HandleFunc("/aws/delete", awsHandlers.DeleteObjectHandler)
 }
 

@@ -38,7 +38,7 @@ func ListObjectsInBucket(bucketName string) ([]S3Object, error) {
 		}
 		objects = append(objects, obj)
 	}
-
+	fmt.Println(objects)
 	return objects, nil
 
 }
