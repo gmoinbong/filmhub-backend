@@ -7,9 +7,11 @@ import (
 )
 
 func SetupRoutes() {
-	http.HandleFunc("/list-aws", awsHandlers.ListObjectsHandler)
+	http.HandleFunc("/aws/list", awsHandlers.ListObjectsHandler)
 
-	http.HandleFunc("/upload-aws", awsHandlers.UploadFileHandler)
+	http.HandleFunc("/aws/upload", awsHandlers.UploadFileHandler)
+
+	http.HandleFunc("/aws/delete", awsHandlers.DeleteObjectHandler)
 }
 
 func StartServer(port string) {
