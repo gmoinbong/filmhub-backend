@@ -16,6 +16,12 @@ func ListObjectsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	jsonData, err := json.Marshal(objects)
+	if err != nil {
+		http.Error(w, "unable to marshal objects to JSON", http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(objects)
+	w.Write(jsonData)
 }
