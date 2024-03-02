@@ -13,7 +13,7 @@ import (
 
 func UpdateObject(objectKey string, filePath string) error {
 	bucket := os.Getenv("BUCKET_NAME")
-	client, err := awsConfig.NewS3Client()
+	client, err := awsConfig.NewS3Client("vladyslavhttp://localhost:8080/aws/list")
 	if err != nil {
 		return fmt.Errorf("unable to initialize S3 client: %v", err)
 	}

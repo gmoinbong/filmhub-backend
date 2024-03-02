@@ -7,8 +7,10 @@ import (
 	"log"
 )
 
-func NewS3Client() (*s3.Client, error) {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+func NewS3Client(profile string) (*s3.Client, error) {
+	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithSharedConfigProfile(profile),
+	)
 	if err != nil {
 		log.Println("Unable to load AWS config:", err)
 		return nil, err

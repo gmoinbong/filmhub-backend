@@ -12,14 +12,15 @@ import (
 )
 
 func DeleteObject(objectKey string) error {
-	bucket := os.Getenv("BUCKET_NAME")
-	client, err := awsConfig.NewS3Client()
+	bucketName := os.Getenv("BUCKET_NAME")
+
+	client, err := awsConfig.NewS3Client("vladyslav")
 	if err != nil {
 		return fmt.Errorf("unable to initialize S3 client :%v", err)
 	}
 
 	_, err = client.DeleteObject(context.TODO(), &s3.DeleteObjectInput{
-		Bucket: aws.String(bucket),
+		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
 	})
 

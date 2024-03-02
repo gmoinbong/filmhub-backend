@@ -16,7 +16,7 @@ type S3Object struct {
 }
 
 func ListObjectsInBucket(bucketName string) ([]S3Object, error) {
-	client, err := awsConfig.NewS3Client()
+	client, err := awsConfig.NewS3Client("vladyslav")
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize S3 client: %v", err)
 	}
