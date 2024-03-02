@@ -3,9 +3,9 @@ package router
 import (
 	"log"
 	"movie-service/aws/awsHandlers"
-	"movie-service/internal/handlers"
 	"net/http"
 )
+
 
 func SetupAwsRoutes() {
 	http.HandleFunc("/aws/list", awsHandlers.ListObjectsHandler)
@@ -15,8 +15,13 @@ func SetupAwsRoutes() {
 }
 
 func SetupRoutes() {
-	http.HandleFunc("/films/", awsHandlers.GetVideoHandler)
-	http.HandleFunc("/series/", handlers.GetSeriesHandler)
+	//TODO: add profile logic for default useres and admin panel
+	http.HandleFunc("/films/", func(w http.ResponseWriter, r *http.Request) {
+		awsHandlers.HandleVideoRequest(w, r, "films")
+	})
+	http.HandleFunc("/series/", func(w http.ResponseWriter, r *http.Request) {
+		awsHandlers.HandleVideoRequest(w, r, "series")
+	})
 }
 
 func StartServer(port string) {

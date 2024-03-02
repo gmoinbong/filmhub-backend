@@ -4,9 +4,9 @@ import (
 	"fmt"
 )
 
-func GetVideoURL(bucketName, region, videoName string) (string, error) {
+func GetVideoURL(bucketName, region, folderName, videoName string) (string, error) {
 
-	videoURL := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, videoName)
+	videoURL := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s/%s", bucketName, region, folderName, videoName)
 
 	return videoURL, nil
 }
