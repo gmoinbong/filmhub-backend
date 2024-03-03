@@ -3,25 +3,20 @@ package router
 import (
 	"log"
 	"movie-service/aws/awsHandlers"
+	"movie-service/middleware"
 	"net/http"
 )
 
-
 func SetupAwsRoutes() {
-	http.HandleFunc("/aws/list", awsHandlers.ListObjectsHandler)
-	http.HandleFunc("/aws/upload", awsHandlers.UploadFileHandler)
-	http.HandleFunc("/aws/update", awsHandlers.UpdateObjectHandler)
-	http.HandleFunc("/aws/delete", awsHandlers.DeleteObjectHandler)
+	middleware.SetupAwsRoute("/aws/list", http.HandlerFunc(awsHandlers.ListObjectsHandler))
+	middleware.SetupAwsRoute("/aws/upload", http.HandlerFunc(awsHandlers.UploadFileHandler))
+	middleware.SetupAwsRoute("/aws/update", http.HandlerFunc(awsHandlers.UpdateObjectHandler))
+	middleware.SetupAwsRoute("/aws/delete", http.HandlerFunc(awsHandlers.DeleteObjectHandler))
 }
 
 func SetupRoutes() {
-	//TODO: add profile logic for default useres and admin panel
-	http.HandleFunc("/films/", func(w http.ResponseWriter, r *http.Request) {
-		awsHandlers.HandleVideoRequest(w, r, "films")
-	})
-	http.HandleFunc("/series/", func(w http.ResponseWriter, r *http.Request) {
-		awsHandlers.HandleVideoRequest(w, r, "series")
-	})
+	middleware.SetupVideoRoutes("/films/", awsHandlers.HandleVideoRequest)
+	middleware.SetupVideoRoutes("/series/", awsHandlers.HandleVideoRequest)
 }
 
 func StartServer(port string) {
