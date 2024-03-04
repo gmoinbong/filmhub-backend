@@ -1,8 +1,10 @@
 package router
 
 import (
+	"fmt"
 	"log"
 	"movie-service/aws/awsHandlers"
+	"movie-service/internal/database"
 	"movie-service/middleware"
 	"net/http"
 )
@@ -20,6 +22,10 @@ func SetupRoutes() {
 }
 
 func StartServer(port string) {
+	dbService := database.New()
+	health := dbService.Health()
+	fmt.Print(health)
+
 	SetupAwsRoutes()
 	SetupRoutes()
 
