@@ -1,32 +1,28 @@
-package main
+package router
 
 import (
 	"fmt"
 	"log/slog"
-	"movie-service/cmd/api/aws/awsHandlers"
 	"movie-service/internal/config"
 	"movie-service/internal/database"
 	"movie-service/internal/env"
 	"movie-service/internal/logger"
-	"movie-service/internal/middleware"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/rs/cors"
 )
 
-func setupAwsRoutes() {
-	middleware.SetupAwsRoute("/aws/list", http.HandlerFunc(awsHandlers.ListObjectsHandler))
-	middleware.SetupAwsRoute("/aws/upload", http.HandlerFunc(awsHandlers.UploadFileHandler))
-	middleware.SetupAwsRoute("/aws/update", http.HandlerFunc(awsHandlers.UpdateObjectHandler))
-	middleware.SetupAwsRoute("/aws/delete", http.HandlerFunc(awsHandlers.DeleteObjectHandler))
+type Router struct {
+	http.ServeMux
 }
 
-func setupRoutes() {
-	middleware.SetupVideoRoutes("/films/", awsHandlers.HandleVideoRequest)
-	middleware.SetupVideoRoutes("/series/", awsHandlers.HandleVideoRequest)
+func NewRouter() *Router {
+	return &Router{*http.NewServeMux()}
 }
 
-func StartServer() {
+func (r *Router) StartServer() {
 	env.LoadEnv()
 	logger := logger.New()
 	cfg := config.New()
@@ -35,11 +31,14 @@ func StartServer() {
 	health := dbService.Health()
 	logger.Logger.Info(fmt.Sprintf("%v", health))
 
-	setupAwsRoutes()
-	setupRoutes()
+	handler := setupCors(r)
+
+	SetupAwsRoutes(r)
+	SetupRoutes(r)
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Port),
+		Handler:      handler,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -50,4 +49,9 @@ func StartServer() {
 	err := srv.ListenAndServe()
 	logger.Logger.Error(err.Error())
 	os.Exit(1)
+}
+
+func setupCors(handler http.Handler) http.Handler {
+	c := cors.Default()
+	return c.Handler(handler)
 }

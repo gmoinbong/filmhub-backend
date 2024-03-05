@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func HandleVideoRequest(w http.ResponseWriter, r *http.Request, folderName string) {
+func handleVideoRequest(w http.ResponseWriter, r *http.Request, folderName string) {
 	region := os.Getenv("REGION")
 	bucketName := os.Getenv("BUCKET_NAME")
 	videoName := r.URL.Path[len(folderName):]
@@ -38,4 +38,12 @@ func HandleVideoRequest(w http.ResponseWriter, r *http.Request, folderName strin
 
 	http.Redirect(w, r, videoURL, http.StatusFound)
 
+}
+
+func HandleFilmRequest(w http.ResponseWriter, r *http.Request) {
+	handleVideoRequest(w, r, "/films")
+}
+
+func HandleSerieRequest(w http.ResponseWriter, r *http.Request) {
+	handleVideoRequest(w, r, "/series")
 }

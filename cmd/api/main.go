@@ -1,7 +1,8 @@
 package main
 
-import ()
+import "movie-service/cmd/api/router"
 
 func main() {
-	StartServer()
+	r := router.NewRouter()
+	r.StartServer()
 }
