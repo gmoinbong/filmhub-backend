@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"movie-service/aws/awsConfig"
+	"movie-service/cmd/api/aws/awsConfig"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"

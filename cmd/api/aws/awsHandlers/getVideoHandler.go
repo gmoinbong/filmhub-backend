@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"movie-service/aws/awsOperations"
+	"movie-service/cmd/api/aws/awsOperations"
 	"net/http"
 	"os"
 )

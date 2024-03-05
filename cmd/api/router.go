@@ -1,14 +1,14 @@
-package router
+package main
 
 import (
 	"fmt"
 	"log/slog"
-	"movie-service/aws/awsHandlers"
+	"movie-service/cmd/api/aws/awsHandlers"
 	"movie-service/internal/config"
 	"movie-service/internal/database"
+	"movie-service/internal/env"
 	"movie-service/internal/logger"
-	"movie-service/middleware"
-	"movie-service/router/env"
+	"movie-service/internal/middleware"
 	"net/http"
 	"os"
 	"time"
@@ -26,11 +26,6 @@ func setupRoutes() {
 	middleware.SetupVideoRoutes("/series/", awsHandlers.HandleVideoRequest)
 }
 
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
-}
-
 func StartServer() {
 	env.LoadEnv()
 	logger := logger.New()
@@ -45,7 +40,6 @@ func StartServer() {
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Port),
-		Handler:      http.HandlerFunc(healthCheckHandler),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,

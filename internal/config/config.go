@@ -1,7 +1,7 @@
 package config
 
 import (
-	"movie-service/router/env"
+	"movie-service/internal/env"
 	"os"
 	"strconv"
 )

@@ -1,9 +1,7 @@
 package main
 
-import (
-	"movie-service/router"
-)
+import ()
 
 func main() {
-	router.StartServer()
+	StartServer()
 }

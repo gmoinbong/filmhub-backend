@@ -2,7 +2,7 @@ package awsHandlers
 
 import (
 	"fmt"
-	"movie-service/aws/awsOperations"
+	"movie-service/cmd/api/aws/awsOperations"
 	"net/http"
 	"os"
 )
