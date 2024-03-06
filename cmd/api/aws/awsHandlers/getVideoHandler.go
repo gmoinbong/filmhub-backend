@@ -1,6 +1,7 @@
 package awsHandlers
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"movie-service/cmd/api/aws/awsOperations"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func streamVideo(w http.ResponseWriter, r *http.Request, folderName string) {
@@ -21,9 +23,22 @@ func streamVideo(w http.ResponseWriter, r *http.Request, folderName string) {
 		return
 	}
 
-	resp, err := http.Head(videoURL)
+	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+	defer cancel()
+
+	client := &http.Client{
+		Timeout: 3 * time.Second,
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "GET", videoURL, nil)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("unable to get video information: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("error creating request: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("unable to open video link: %v", err), http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
@@ -35,15 +50,10 @@ func streamVideo(w http.ResponseWriter, r *http.Request, folderName string) {
 		return
 	}
 
-	rangeHeader := r.Header.Get("Range")
-	if rangeHeader == "" {
-		http.ServeFile(w, r, "video.mp4")
-		return
-	}
-
-	start, end, err := parseRangeHeader(rangeHeader, videoLength)
+	start, end, err := parseRangeHeader(r.Header.Get("Range"), videoLength)
 	if err != nil {
-		http.Error(w, "invalid range header", http.StatusRequestedRangeNotSatisfiable)
+		w.WriteHeader(http.StatusRequestedRangeNotSatisfiable)
+		w.Write([]byte("invalid range header"))
 		return
 	}
 
@@ -53,28 +63,18 @@ func streamVideo(w http.ResponseWriter, r *http.Request, folderName string) {
 	w.Header().Set("Accept-Ranges", "bytes")
 	w.WriteHeader(http.StatusPartialContent)
 
-	videoResp, err := http.Get(videoURL)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("unable to open video link: %v", err), http.StatusInternalServerError)
-		return
+	if start > 0 {
+		if _, err := io.CopyN(io.Discard, resp.Body, start); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("error skipping bytes: %v", err)))
+			return
+		}
 	}
-	defer videoResp.Body.Close()
 
-	buf := make([]byte, 32*1024)
-	for {
-		n, err := videoResp.Body.Read(buf)
-		if err != nil && err != io.EOF {
-			http.Error(w, fmt.Sprintf("error reading video: %v", err), http.StatusInternalServerError)
-			return
-		}
-		if n == 0 {
-			break
-		}
-
-		if _, err := w.Write(buf[:n]); err != nil {
-			http.Error(w, fmt.Sprintf("error writing response: %v", err), http.StatusInternalServerError)
-			return
-		}
+	if _, err := io.CopyN(w, resp.Body, end-start+1); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("error sending video data: %v", err)))
+		return
 	}
 }
 
@@ -87,12 +87,16 @@ func HandleSerieRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func parseRangeHeader(header string, videoLength int64) (start, end int64, err error) {
-	parts := strings.Split(header, "=")
+	if header == "" {
+		return 0, 0, nil
+	}
+
+	parts := strings.SplitN(header, "=", 2)
 	if len(parts) != 2 || parts[0] != "bytes" {
 		return 0, 0, fmt.Errorf("invalid range header")
 	}
 
-	byteRange := strings.Split(parts[1], "-")
+	byteRange := strings.SplitN(parts[1], "-", 2)
 	if len(byteRange) != 2 {
 		return 0, 0, fmt.Errorf("invalid byte range")
 	}
