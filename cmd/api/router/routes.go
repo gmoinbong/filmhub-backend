@@ -1,7 +1,7 @@
 package router
 
 import (
-	"movie-service/cmd/api/aws/awsHandlers"
+	"movie-service/internal/aws/awsHandlers"
 )
 
 func SetupAwsRoutes(r *Router) {

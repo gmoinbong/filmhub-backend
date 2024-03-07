@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"movie-service/cmd/api/aws/awsOperations"
+	"log"
+	"movie-service/internal/aws/awsOperations"
 	"net/http"
 	"os"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 	"time"
 )
 
+// TODO: end test
 func streamVideo(w http.ResponseWriter, r *http.Request, folderName string) {
 	region := os.Getenv("REGION")
 	bucketName := os.Getenv("BUCKET_NAME")
@@ -52,8 +54,7 @@ func streamVideo(w http.ResponseWriter, r *http.Request, folderName string) {
 
 	start, end, err := parseRangeHeader(r.Header.Get("Range"), videoLength)
 	if err != nil {
-		w.WriteHeader(http.StatusRequestedRangeNotSatisfiable)
-		w.Write([]byte("invalid range header"))
+		http.Error(w, "invalid range header", http.StatusRequestedRangeNotSatisfiable)
 		return
 	}
 
@@ -65,17 +66,17 @@ func streamVideo(w http.ResponseWriter, r *http.Request, folderName string) {
 
 	if start > 0 {
 		if _, err := io.CopyN(io.Discard, resp.Body, start); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(fmt.Sprintf("error skipping bytes: %v", err)))
+			http.Error(w, fmt.Sprintf("error skipping bytes: %v", err), http.StatusInternalServerError)
 			return
 		}
 	}
 
 	if _, err := io.CopyN(w, resp.Body, end-start+1); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("error sending video data: %v", err)))
+		http.Error(w, fmt.Sprintf("error sending video data: %v", err), http.StatusInternalServerError)
 		return
 	}
+
+	log.Println("Video stream successful:", videoName)
 }
 
 func HandleFilmRequest(w http.ResponseWriter, r *http.Request) {

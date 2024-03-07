@@ -2,7 +2,7 @@ package tests
 
 import (
 	"encoding/json"
-	"movie-service/cmd/api/aws/awsHandlers"
+	"movie-service/internal/aws/awsHandlers"
 	"net/http"
 	"net/http/httptest"
 	"os"

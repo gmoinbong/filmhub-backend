@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"mime/multipart"
-	"movie-service/cmd/api/aws/awsConfig"
+	"movie-service/internal/aws/awsConfig"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"

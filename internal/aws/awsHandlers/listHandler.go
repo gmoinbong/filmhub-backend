@@ -3,7 +3,7 @@ package awsHandlers
 import (
 	"encoding/json"
 	"fmt"
-	"movie-service/cmd/api/aws/awsOperations"
+	"movie-service/internal/aws/awsOperations"
 	"net/http"
 	"os"
 )

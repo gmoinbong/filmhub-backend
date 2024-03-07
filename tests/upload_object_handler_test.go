@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	"movie-service/cmd/api/aws/awsHandlers"
+	"movie-service/internal/aws/awsHandlers"
 	"net/http"
 	"net/http/httptest"
 	"os"
