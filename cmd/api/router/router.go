@@ -35,7 +35,6 @@ func (r *Router) StartServer() {
 
 	SetupAwsRoutes(r)
 	SetupRoutes(r)
-
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Port),
 		Handler:      handler,
