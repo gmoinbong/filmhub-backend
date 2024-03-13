@@ -5,14 +5,17 @@ import (
 	"os"
 )
 
-type Logger struct {
-	Logger *slog.Logger
+type Logger interface {
+	Info(message string, args ...interface{})
+	Error(message string, args ...interface{})
+	Handler() slog.Handler
 }
 
-func New() *Logger {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	return &Logger{Logger: logger}
+var DefaultLogger Logger
+
+func init() {
+	DefaultLogger = slog.New(slog.NewTextHandler(os.Stdout, nil))
 }
-func (l *Logger) New() *Logger {
-	return New()
+func GetLogger() Logger {
+	return DefaultLogger
 }

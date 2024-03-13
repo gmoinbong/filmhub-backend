@@ -1,0 +1,4 @@
+package adminpanel
+
+func AdminHandler() {
+}
