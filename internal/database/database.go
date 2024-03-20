@@ -12,14 +12,6 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-type Service interface {
-	Health() map[string]string
-}
-
-type service struct {
-	db *sql.DB
-}
-
 var (
 	database = os.Getenv("DB_DATABASE")
 	password = os.Getenv("DB_PASSWORD")
@@ -28,17 +20,28 @@ var (
 	host     = os.Getenv("DB_HOST")
 )
 
-func New() Service {
+type Service struct {
+	db *sql.DB
+}
+
+func New() (*Service, error) {
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", username, password, host, port, database)
 	db, err := sql.Open("pgx", connStr)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	s := &service{db: db}
-	return s
+	return &Service{db: db}, nil
 }
 
-func (s *service) Health() map[string]string {
+func (s *Service) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+	result, err := s.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (s *Service) Health() map[string]string {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 

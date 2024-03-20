@@ -1,8 +1,9 @@
-package streamhandlers
+package handler
 
 import (
 	"encoding/json"
 	"fmt"
+	"movie-service/internal/variables"
 	"net/http"
 )
 
@@ -50,10 +51,10 @@ func listStreamVideos(libraryId, accessKey string) (VideoListResponse, error) {
 	return response, nil
 }
 
-func HandleListVideo(libraryId, accesKey string) http.HandlerFunc {
+func HandleListVideo(listParams variables.ListParams) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		objects, err := listStreamVideos(libraryId, accesKey)
+		objects, err := listStreamVideos(listParams.LibraryID, listParams.AccessKey)
 		if err != nil {
 			Logger.Error(err.Error())
 			http.Error(w, "Failed to list object from Bunny Stream Storage", http.StatusInternalServerError)

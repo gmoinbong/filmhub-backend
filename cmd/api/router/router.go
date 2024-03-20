@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"movie-service/internal/config"
 	"movie-service/internal/cors"
+	"movie-service/internal/data"
 	"movie-service/internal/database"
 	"movie-service/internal/env"
 	"movie-service/internal/logger"
@@ -15,11 +16,17 @@ import (
 
 var Logger = logger.GetLogger()
 
+
 type Router struct {
 	http.ServeMux
 }
 
 func NewRouter() *Router {
+	dbService, errDb := database.New()
+	if errDb != nil {
+		Logger.Info("err")
+	}
+	data.VideoRepo = data.New(*dbService)
 	return &Router{*http.NewServeMux()}
 }
 
@@ -27,12 +34,11 @@ func (r *Router) StartServer() {
 	env.LoadEnv()
 	cfg := config.New()
 
-	dbService := database.New()
-	health := dbService.Health()
+	health := data.VideoRepo.Db.Health()
 	Logger.Info(fmt.Sprintf("%v", health))
 
-	SetupBunnyRoutes(r)
-
+	SetupBunnySeriesRoutes(r)
+	SetupBunnyFilmsRoutes(r)
 	handler := setupCors(r)
 
 	http.Handle("/", handler)

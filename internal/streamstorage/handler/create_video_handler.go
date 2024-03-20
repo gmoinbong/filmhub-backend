@@ -1,10 +1,9 @@
-package streamhandlers
+package handler
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"movie-service/internal/utils"
 	"net/http"
 )
 
@@ -18,13 +17,14 @@ type CreateVideoResponse struct {
 	VideoID string `json:"guid"`
 }
 
-func createVideo(libraryId, accessKey string, fileName string) (string, error) {
+func createVideo(libraryID, accessKey string, fileName string) (string, error) {
 
-	url := fmt.Sprintf(baseStreamURL, libraryId)
+	url := fmt.Sprintf(baseStreamURL, libraryID)
 
 	createVideoReq := CreateVideoRequset{
 		Title: fileName,
 	}
+
 	createVideoReqJSON, err := json.Marshal(createVideoReq)
 	if err != nil {
 		Logger.Info("Failed to marshal requst JSON", err.Error())
@@ -53,34 +53,6 @@ func createVideo(libraryId, accessKey string, fileName string) (string, error) {
 		Logger.Info("Failed to decode response JSON", err.Error())
 		return "", err
 	}
+
 	return createVideoResp.VideoID, nil
-}
-
-func HandleVideoCreate(accessKey, libId string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-
-		file, fileHeader, err := r.FormFile("file")
-		if err != nil {
-			Logger.Error("Failed to get file from request", err)
-			http.Error(w, "Failed to get file from request", http.StatusBadRequest)
-			return
-		}
-		defer file.Close()
-
-		fileName := fileHeader.Filename
-		title := utils.ExtractTitleFromFileName(fileName)
-		Logger.Info(title)
-
-		videoLibraryId, err := createVideo(libId, accessKey, title)
-		if err != nil {
-			Logger.Error("Failed to create video", err)
-			http.Error(w, "Failed to create video", http.StatusInternalServerError)
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		response := fmt.Sprintf(`{"message": "Video uploaded successfully", "video_id": "%s"}`, videoLibraryId)
-
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(response))
-	}
 }
