@@ -13,37 +13,33 @@ import (
 
 var Logger = logger.GetLogger()
 
+//todo validation body
+
+func HandleUploadStatusWebhook(params variables.UploadParams) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		Logger.Info("Incoming webhook request:")
+		Logger.Info("params", params.TableName)
+		Logger.Info("Method:", r.Method)
+		Logger.Info("X-Callback-Key:", r.Header.Get("X-Callback-Key"))
+		Logger.Info("key access", variables.ListSeriesParams.AccessKey)
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		fmt.Printf(r.RequestURI)
+	}
+}
+
 func HandleVideoUpload(uploadParams variables.UploadParams) http.HandlerFunc {
 	controller := controller.NewVideoController(*service.NewVideoService(data.VideoRepo))
+	uploadStatusHandler := HandleUploadStatusWebhook(uploadParams)
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		Logger.Info("Incoming request:", r.Method, r.URL.Path)
 
-		if r.Method == http.MethodPost {
-			if r.Header.Get("X-Callback-Key") == variables.ListSeriesParams.AccessKey {
-				err := r.ParseForm()
-				if err != nil {
-					http.Error(w, "Failed to parse request body", http.StatusBadRequest)
-					return
-				}
-
-				videoID := r.Form.Get("VideoGuid")
-				title := r.Form.Get("title")
-				if videoID == "" || title == "" {
-					http.Error(w, "Video ID or title is empty", http.StatusBadRequest)
-					return
-				}
-				Logger.Info("Received video ID:", videoID, " and title:", title)
-
-				err = UploadStatusWebhook(uploadParams, videoID, title)
-				if err != nil {
-					Logger.Error("Failed to handle upload status webhook", err.Error())
-					http.Error(w, "Failed to handle upload status webhook", http.StatusInternalServerError)
-					return
-				}
-
-				w.WriteHeader(http.StatusOK)
-				return
-			}
+		if r.Method == http.MethodPut && r.Header.Get("X-Callback-Key") == variables.ListSeriesParams.AccessKey {
+			uploadStatusHandler(w, r)
+			return
 		}
 
 		file, fileHeader, err := r.FormFile("file")
@@ -56,7 +52,11 @@ func HandleVideoUpload(uploadParams variables.UploadParams) http.HandlerFunc {
 		defer file.Close()
 
 		fileName := fileHeader.Filename
-		title := utils.ExtractTitleFromFileName(fileName)
+		title, err := utils.ExtractTitleFromFileName(fileName)
+		if err != nil {
+			Logger.Error("Failed to extract title from file name", err)
+		}
+
 		Logger.Info(title)
 
 		if fileHeader.Filename != fileName {

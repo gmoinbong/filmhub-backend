@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-func ExtractTitleFromFileName(fileName string) string {
+func ExtractTitleFromFileName(fileName string) (string, error) {
 	fileNameWithoutExt := strings.TrimSuffix(filepath.Base(fileName), filepath.Ext(fileName))
 
 	title := strings.ReplaceAll(fileNameWithoutExt, "_", " ")
 
-	return title
+	return title, nil
 }

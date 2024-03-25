@@ -20,8 +20,9 @@ func NewVideoController(videoService service.VideoService) *UploadVideoControlle
 	return &UploadVideoController{VideoService: &videoService}
 }
 
-func (vc *UploadVideoController) UploadVideo(uploadParams variables.UploadParams, videoId string, videoFile multipart.File) error {
-	url, fileContents, err := vc.VideoService.PrepareUploadVideo(uploadParams.LibraryID, videoId, videoFile)
+func (vc *UploadVideoController) UploadVideo(uploadParams variables.UploadParams, videoId string, file multipart.File) error {
+
+	url, fileContents, err := vc.VideoService.PrepareUploadVideo(uploadParams.LibraryID, videoId, file)
 	if err != nil {
 		Logger.Error("Failed to prepare upload video", err.Error())
 		return err

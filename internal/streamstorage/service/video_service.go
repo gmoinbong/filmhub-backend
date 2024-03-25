@@ -12,7 +12,7 @@ var Logger = logger.GetLogger()
 
 type VideoService struct {
 	DataRepo *data.VideoRepository
-}	
+}
 
 func NewVideoService(dataRepo *data.VideoRepository) *VideoService {
 	return &VideoService{DataRepo: dataRepo}
