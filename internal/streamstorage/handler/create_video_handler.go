@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"movie-service/internal/data"
 	"net/http"
 )
 
@@ -17,7 +18,7 @@ type CreateVideoResponse struct {
 	VideoID string `json:"guid"`
 }
 
-func createVideo(libraryID, accessKey string, fileName string) (string, error) {
+func createVideo(libraryID, accessKey string, fileName, tableName string) (string, error) {
 
 	url := fmt.Sprintf(baseStreamURL, libraryID)
 
@@ -47,6 +48,12 @@ func createVideo(libraryID, accessKey string, fileName string) (string, error) {
 	defer resp.Body.Close()
 
 	var createVideoResp CreateVideoResponse
+
+	err = data.VideoRepo.InsertVideoTitleToDB(fileName, tableName)
+	if err != nil {
+		Logger.Error("Falied to save vide data to database", err)
+		return "", err
+	}
 
 	err = json.NewDecoder(resp.Body).Decode(&createVideoResp)
 	if err != nil {

@@ -13,23 +13,6 @@ import (
 
 var Logger = logger.GetLogger()
 
-//todo validation body
-
-func HandleUploadStatusWebhook(params variables.UploadParams) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		Logger.Info("Incoming webhook request:")
-		Logger.Info("params", params.TableName)
-		Logger.Info("Method:", r.Method)
-		Logger.Info("X-Callback-Key:", r.Header.Get("X-Callback-Key"))
-		Logger.Info("key access", variables.ListSeriesParams.AccessKey)
-		if r.Method != http.MethodPost {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-		fmt.Printf(r.RequestURI)
-	}
-}
-
 func HandleVideoUpload(uploadParams variables.UploadParams) http.HandlerFunc {
 	controller := controller.NewVideoController(*service.NewVideoService(data.VideoRepo))
 	uploadStatusHandler := HandleUploadStatusWebhook(uploadParams)
@@ -37,7 +20,7 @@ func HandleVideoUpload(uploadParams variables.UploadParams) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		Logger.Info("Incoming request:", r.Method, r.URL.Path)
 
-		if r.Method == http.MethodPut && r.Header.Get("X-Callback-Key") == variables.ListSeriesParams.AccessKey {
+		if r.Method == http.MethodPut && r.Header.Get("X-Callback-Key") == variables.ListSeriesParams.AccessKey || r.Header.Get("X-Callback-Key") == variables.ListFilmsParams.AccessKey {
 			uploadStatusHandler(w, r)
 			return
 		}
@@ -65,7 +48,7 @@ func HandleVideoUpload(uploadParams variables.UploadParams) http.HandlerFunc {
 			return
 		}
 
-		videoID, err := createVideo(uploadParams.LibraryID, uploadParams.AccessKey, title)
+		videoID, err := createVideo(uploadParams.LibraryID, uploadParams.AccessKey, title, uploadParams.TableName)
 		if err != nil {
 			Logger.Error("Failed to create video", err.Error())
 			http.Error(w, "Failed to create video", http.StatusInternalServerError)
